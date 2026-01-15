@@ -322,11 +322,6 @@ function CompleteRegistrationContent() {
         {/* Header */}
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div
-              className={`w-12 h-12 rounded-2xl ${roleDisplay.bgColor} flex items-center justify-center`}
-            >
-              {roleDisplay.icon}
-            </div>
             <h1 className="text-3xl font-bold text-gray-800">
               {roleDisplay.title}
             </h1>
@@ -400,12 +395,6 @@ function CompleteRegistrationContent() {
                 </div>
               </div>
               <div className="flex justify-between mt-2">
-                <p className="text-xs text-gray-500">
-                  Required for{" "}
-                  {formData.type === "rider"
-                    ? "rider communications and deliveries"
-                    : "order updates and delivery notifications"}
-                </p>
                 <p className="text-xs text-gray-500 font-medium">
                   {formData.phoneNumber.length}/10 digits
                 </p>

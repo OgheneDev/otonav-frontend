@@ -403,7 +403,9 @@ export default function SettingsPage() {
                   />
                 ) : (
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-gray-800 text-sm">{authUser?.email}</p>
+                    <p className="text-gray-800 text-sm truncate w-[80%] md:w-full">
+                      {authUser?.email}
+                    </p>
                     {authUser?.emailVerified && (
                       <span className="px-2 py-0.5 bg-green-50 text-[#00A082] text-[9px] font-black uppercase rounded-md border border-green-100">
                         Verified
@@ -446,9 +448,6 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <div className="flex justify-between">
-                      <p className="text-xs text-gray-500">
-                        Enter 10 digits starting with 0
-                      </p>
                       <p className="text-xs text-gray-500 font-medium">
                         {formData.phoneNumber.replace(/\D/g, "").length}/10
                         digits
@@ -460,11 +459,6 @@ export default function SettingsPage() {
                     <p className="text-gray-800 text-sm">
                       {displayPhoneNumber}
                     </p>
-                    {authUser?.phoneNumber && (
-                      <p className="text-xs text-gray-500">
-                        Stored as: {authUser.phoneNumber}
-                      </p>
-                    )}
                   </div>
                 )}
               </div>

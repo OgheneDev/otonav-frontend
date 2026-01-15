@@ -184,8 +184,9 @@ export default function VerifyEmail() {
   const getMaskedEmail = () => {
     if (!email) return "";
     const [name, domain] = email.split("@");
-    if (name.length <= 3) return email;
-    const maskedName = name.substring(0, 3) + "*".repeat(name.length - 3);
+    // Show only first 2 and last 1 char of the name
+    const maskedName =
+      name.length > 3 ? `${name.substring(0, 2)}...${name.slice(-1)}` : name;
     return `${maskedName}@${domain}`;
   };
 
@@ -343,7 +344,7 @@ export default function VerifyEmail() {
                 <p className="text-sm text-gray-600">
                   Verification code sent to
                 </p>
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-gray-900 truncate">
                   {getMaskedEmail()}
                 </p>
               </div>
@@ -354,41 +355,45 @@ export default function VerifyEmail() {
 
         {/* OTP Inputs */}
         <div className="space-y-4">
-          <label className="text-sm font-semibold text-gray-700 pl-1">
-            Enter 6-digit code
-          </label>
-          <div className="flex justify-between gap-2">
+          <div className="flex justify-between items-center px-1">
+            <label className="text-sm font-semibold text-gray-700">
+              Enter 6-digit code
+            </label>
+            {/* Moved Clear All here to save vertical space on mobile */}
+            <button
+              onClick={handleClearAll}
+              className="text-xs text-gray-400 cursor-pointer hover:text-[#FF6B6B] transition-colors font-bold uppercase tracking-wider"
+              disabled={isVerifyingEmail}
+            >
+              Clear all
+            </button>
+          </div>
+
+          <div className="grid grid-cols-6 gap-2 sm:gap-3">
             {otp.map((digit, index) => (
-              <div key={index} className="relative group">
+              <div key={index} className="relative group aspect-square">
                 <input
                   ref={(el) => {
                     inputRefs.current[index] = el;
                   }}
                   type="text"
                   inputMode="numeric"
+                  autoComplete="one-time-code"
                   pattern="\d*"
                   maxLength={1}
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
-                  className="w-14 h-14 text-center text-2xl font-bold bg-gray-50 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FF6B6B]/30 focus:border-[#FF6B6B] focus:bg-white transition-all outline-none text-gray-900 disabled:opacity-50"
+                  className="w-full h-full text-center text-xl sm:text-2xl font-black bg-gray-50 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-[#FF6B6B]/10 focus:border-[#FF6B6B] focus:bg-white transition-all outline-none text-gray-900 disabled:opacity-50"
                   disabled={isVerifyingEmail}
                   autoFocus={index === 0}
                 />
-                <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gray-200 rounded-full group-focus-within:bg-[#FF6B6B] transition-colors" />
+                {/* Active indicator bar */}
+                <div className="absolute -bottom-1 left-2 right-2 h-1 bg-transparent group-focus-within:bg-[#FF6B6B] rounded-full transition-colors" />
               </div>
             ))}
           </div>
-
-          {/* Clear All Button */}
-          <button
-            onClick={handleClearAll}
-            className="text-sm text-gray-500 cursor-pointer hover:text-gray-700 transition-colors font-medium"
-            disabled={isVerifyingEmail}
-          >
-            Clear all
-          </button>
         </div>
 
         {/* Resend OTP */}

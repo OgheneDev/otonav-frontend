@@ -184,21 +184,21 @@ export function CreateRiderModal({ onClose }: ModalProps) {
             </div>
           )}
 
-          <div className="pt-4 flex justify-between items-center">
+          <div className="pt-4 flex flex-col md:flex-row gap-4 md:justify-between items-center">
             <button
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-6 py-3 bg-gray-200 cursor-pointer text-sm hover:bg-gray-300 text-gray-700 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-gray-200 w-full cursor-pointer text-sm hover:bg-gray-300 text-gray-700 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-8 py-3 bg-[#008B94] cursor-pointer text-sm hover:bg-[#007a82] text-white rounded-full transition-all shadow-lg shadow-teal-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+              className="px-8 py-3 bg-[#008B94] w-full cursor-pointer text-sm hover:bg-[#007a82] text-white rounded-full transition-all shadow-lg shadow-teal-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
             >
               {isSubmitting ? (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center justify-center gap-2">
                   <svg
                     className="animate-spin h-4 w-4 text-white"
                     xmlns="http://www.w3.org/2000/svg"
