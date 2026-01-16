@@ -8,6 +8,10 @@ export interface Customer {
   registrationStatus: "pending" | "completed" | "cancelled" | "expired" | null;
   createdAt: string;
   lastLoginAt: string | null;
+  locations: Array<{
+    label: string;
+    preciseLocation: string;
+  }>;
 }
 
 export interface CustomersResponse {
