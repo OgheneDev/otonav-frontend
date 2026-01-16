@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  ChevronLeft,
   ChevronRight,
   Phone,
   MapPin,
@@ -11,6 +10,8 @@ import {
   Users,
   TrendingUp,
   ArrowUpRight,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { useAuthStore, useRiderStore, useOrderStore } from "@/stores";
 
@@ -93,7 +94,7 @@ export default function DashboardPage() {
 
       {/* Active Delivery Section */}
       <section>
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center mb-6">
           <div>
             <h3 className="text-xl font-semibold text-gray-900">
               Active Deliveries
@@ -101,14 +102,6 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-500 mt-0.5">
               Keep track of ongoing deliveries
             </p>
-          </div>
-          <div className="flex gap-2">
-            <button className="p-2.5 bg-white rounded-xl shadow-sm hover:shadow-md hover:bg-gray-50 border border-gray-100 transition-all hover:-translate-y-0.5 duration-200">
-              <ChevronLeft size={20} className="text-gray-400" />
-            </button>
-            <button className="p-2.5 bg-white rounded-xl shadow-sm hover:shadow-md hover:bg-linear-to-r hover:from-[#E6F4F1] hover:to-white border border-gray-100 hover:border-[#00A082]/20 transition-all hover:-translate-y-0.5 duration-200">
-              <ChevronRight size={20} className="text-[#00A082]" />
-            </button>
           </div>
         </div>
 
@@ -226,6 +219,12 @@ function StatCard({ label, value, color, icon, trend }: any) {
 }
 
 function DeliveryCard({ id, customer, rider, items, location }: any) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:border-gray-200 transition-all duration-300">
       <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-linear-to-r from-gray-50/50 to-white">
@@ -240,43 +239,52 @@ function DeliveryCard({ id, customer, rider, items, location }: any) {
             </p>
           </div>
         </div>
-        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <ChevronRight size={20} className="text-gray-400" />
+        <button
+          onClick={toggleCollapse}
+          className="p-2 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          {isCollapsed ? (
+            <ChevronDown size={20} className="text-gray-400" />
+          ) : (
+            <ChevronUp size={20} className="text-gray-400" />
+          )}
         </button>
       </div>
 
-      <div className="p-6 space-y-6">
-        <ContactRow
-          label="Customer"
-          name={customer?.name || "Customer"}
-          phone={customer?.phoneNumber}
-        />
-
-        <ContactRow
-          label="Assigned Rider"
-          name={rider?.name || "Unassigned"}
-          phone={rider?.phoneNumber}
-        />
-
-        <div className="flex gap-4 p-4 bg-linear-to-r from-gray-50 to-transparent rounded-2xl border border-gray-100">
-          <div className="w-10 h-10 bg-linear-to-br from-[#E6F4F1] to-[#D0EDE6] rounded-full flex items-center justify-center shrink-0 ring-2 ring-[#00A082]/10">
-            <MapPin size={18} className="text-[#00A082]" />
-          </div>
-          <div>
-            <p className="text-gray-900 text-sm mb-1">Delivery Location</p>
-            <p className="text-xs text-gray-600">{location}</p>
-          </div>
-        </div>
-
-        <button className="group w-full py-4 bg-linear-to-r from-[#FF7B7B] to-[#ff6a6a] hover:from-[#ff6a6a] hover:to-[#ff5757] cursor-pointer text-white text-sm rounded-2xl transition-all shadow-lg shadow-red-100 hover:shadow-xl hover:shadow-red-200 active:scale-[0.98] flex items-center justify-center gap-2 relative overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-          <span>Track Order</span>
-          <ArrowUpRight
-            size={16}
-            className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+      {!isCollapsed && (
+        <div className="p-6 space-y-6">
+          <ContactRow
+            label="Customer"
+            name={customer?.name || "Customer"}
+            phone={customer?.phoneNumber}
           />
-        </button>
-      </div>
+
+          <ContactRow
+            label="Assigned Rider"
+            name={rider?.name || "Unassigned"}
+            phone={rider?.phoneNumber}
+          />
+
+          <div className="flex gap-4 p-4 bg-linear-to-r from-gray-50 to-transparent rounded-2xl border border-gray-100">
+            <div className="w-10 h-10 bg-linear-to-br from-[#E6F4F1] to-[#D0EDE6] rounded-full flex items-center justify-center shrink-0 ring-2 ring-[#00A082]/10">
+              <MapPin size={18} className="text-[#00A082]" />
+            </div>
+            <div>
+              <p className="text-gray-900 text-sm mb-1">Delivery Location</p>
+              <p className="text-xs text-gray-600">{location}</p>
+            </div>
+          </div>
+
+          <button className="group w-full py-4 bg-linear-to-r from-[#FF7B7B] to-[#ff6a6a] hover:from-[#ff6a6a] hover:to-[#ff5757] cursor-pointer text-white text-sm rounded-2xl transition-all shadow-lg shadow-red-100 hover:shadow-xl hover:shadow-red-200 active:scale-[0.98] flex items-center justify-center gap-2 relative overflow-hidden">
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <span>Track Order</span>
+            <ArrowUpRight
+              size={16}
+              className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+            />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

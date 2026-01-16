@@ -53,16 +53,13 @@ export default function CustomersPage() {
   const calculatedStats = {
     total: customers.length,
     active: customers.filter(
-      (c) =>
-        c.emailVerified &&
-        c.registrationCompleted &&
-        c.registrationStatus === "completed"
+      (c) => c.emailVerified && c.registrationStatus === "completed"
     ).length,
     pending: customers.filter((c) => c.registrationStatus === "pending").length,
     verified: customers.filter((c) => c.emailVerified).length,
   };
 
-  const stats = customerStats || calculatedStats;
+  const stats = calculatedStats;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 md:px-0">

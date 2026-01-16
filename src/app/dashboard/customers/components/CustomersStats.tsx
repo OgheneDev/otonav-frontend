@@ -1,3 +1,4 @@
+import React from "react";
 import { Users, CheckCircle, Mail, Clock } from "lucide-react";
 
 interface CustomerStats {
@@ -12,65 +13,72 @@ interface CustomersStatsProps {
 }
 
 export function CustomersStats({ stats }: CustomersStatsProps) {
+  const statCards = [
+    {
+      label: "Total Customers",
+      value: stats.total,
+      icon: <Users className="text-[#00A082]" />,
+      gradient: "bg-gradient-to-br from-[#E6F4F1] to-[#D0EDE6]",
+      trend: "",
+    },
+    {
+      label: "Active",
+      value: stats.active,
+      icon: <CheckCircle className="text-[#10B981]" />,
+      gradient: "bg-gradient-to-br from-[#EBFBF5] to-[#D1F5E6]",
+      trend: stats.active > 0 ? `+${stats.active}` : "",
+    },
+    {
+      label: "Email Verified",
+      value: stats.verified,
+      icon: <Mail className="text-[#3B82F6]" />,
+      gradient: "bg-gradient-to-br from-[#EFF6FF] to-[#DBEAFE]",
+      trend: "",
+    },
+    {
+      label: "Pending",
+      value: stats.pending,
+      icon: <Clock className="text-[#F59E0B]" />,
+      gradient: "bg-gradient-to-br from-[#FFF7ED] to-[#FFEDD5]",
+      trend: "",
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      {/* Total Customers */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-gray-500 text-sm font-medium">Total Customers</p>
-            <p className="text-2xl font-bold text-gray-800 mt-1">
-              {stats.total}
-            </p>
-          </div>
-          <div className="bg-blue-50 p-3 rounded-xl">
-            <Users className="text-blue-500" size={24} />
-          </div>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {statCards.map((stat) => (
+        <StatCard
+          key={stat.label}
+          label={stat.label}
+          value={stat.value}
+          color={stat.gradient}
+          icon={stat.icon}
+          trend={stat.trend}
+        />
+      ))}
+    </div>
+  );
+}
 
-      {/* Active */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-gray-500 text-sm font-medium">Active</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">
-              {stats.active}
-            </p>
-          </div>
-          <div className="bg-green-50 p-3 rounded-xl">
-            <CheckCircle className="text-green-500" size={24} />
-          </div>
+function StatCard({ label, value, color, icon, trend }: any) {
+  return (
+    <div className="group bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-300 hover:-translate-y-1">
+      <div className="flex items-center gap-5">
+        <div
+          className={`w-16 h-16 rounded-2xl flex items-center justify-center ${color} ring-1 ring-black/5 shadow-sm`}
+        >
+          {React.cloneElement(icon, { size: 28 })}
         </div>
-      </div>
-
-      {/* Email Verified */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-gray-500 text-sm font-medium">Email Verified</p>
-            <p className="text-2xl font-bold text-blue-600 mt-1">
-              {stats.verified}
-            </p>
+        <div className="flex-1">
+          <div className="flex items-end gap-2 mb-1">
+            <h3 className="text-3xl text-gray-900 tabular-nums">{value}</h3>
+            {trend && (
+              <div className="flex items-center gap-1 px-2 py-0.5 bg-green-50 rounded-full mb-1">
+                <span className="text-[10px] text-green-600">{trend}</span>
+              </div>
+            )}
           </div>
-          <div className="bg-blue-50 p-3 rounded-xl">
-            <Mail className="text-blue-500" size={24} />
-          </div>
-        </div>
-      </div>
-
-      {/* Pending */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-gray-500 text-sm font-medium">Pending</p>
-            <p className="text-2xl font-bold text-yellow-600 mt-1">
-              {stats.pending}
-            </p>
-          </div>
-          <div className="bg-yellow-50 p-3 rounded-xl">
-            <Clock className="text-yellow-500" size={24} />
-          </div>
+          <p className="text-xs text-gray-500">{label}</p>
         </div>
       </div>
     </div>

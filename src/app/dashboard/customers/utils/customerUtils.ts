@@ -31,7 +31,7 @@ export function getStatusDisplay(customer: Customer): StatusDisplay {
     };
   }
 
-  if (customer.emailVerified && customer.registrationCompleted) {
+  if (customer.emailVerified && registrationStatus === "completed") {
     return {
       text: "Active",
       color: "bg-green-50 text-green-600 border-green-100",
