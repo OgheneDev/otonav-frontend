@@ -123,6 +123,7 @@ export interface AuthStore {
   isCreatingRider: boolean;
   isCreatingCustomer: boolean;
   isCompletingRegistration: boolean;
+  isResendingCustomerInvitation: boolean; // NEW
 
   // Actions
   checkAuth: () => Promise<boolean>;
@@ -142,6 +143,9 @@ export interface AuthStore {
   // Organization-specific actions
   createRider: (data: RiderCreationData) => Promise<any>;
   createCustomer: (data: CustomerCreationData) => Promise<any>;
+  resendRiderInvitation: (riderId: string) => Promise<any>;
+  resendCustomerInvitation: (customerId: string) => Promise<any>; // NEW
+  cancelRiderInvitation: (riderId: string) => Promise<any>;
   completeRiderRegistration: (
     data: CompleteRiderRegistrationData
   ) => Promise<AuthUser>;

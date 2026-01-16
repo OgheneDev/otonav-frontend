@@ -17,35 +17,43 @@ import {
   Bike,
   AlertCircle,
   X,
+  Trash2,
 } from "lucide-react";
 import { useOrderStore, useToastStore } from "@/stores";
 import type { Order } from "@/types/order";
+import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 
 // Status mapping for frontend display
 const statusDisplayMap = {
   pending: {
     label: "Pending",
     color: "bg-amber-50 text-amber-700 border-amber-200",
+    canCancel: true,
   },
   rider_accepted: {
     label: "Rider Accepted",
     color: "bg-[#E6F4F1] text-[#00A082] border-[#00A082]/20",
+    canCancel: true,
   },
   customer_location_set: {
     label: "Location Set",
     color: "bg-indigo-50 text-indigo-700 border-indigo-200",
+    canCancel: true,
   },
   confirmed: {
     label: "Confirmed",
     color: "bg-cyan-50 text-cyan-700 border-cyan-200",
+    canCancel: true,
   },
   delivered: {
     label: "Delivered",
     color: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    canCancel: false,
   },
   cancelled: {
     label: "Cancelled",
     color: "bg-rose-50 text-rose-700 border-rose-200",
+    canCancel: false,
   },
 } as const;
 
@@ -65,6 +73,7 @@ export default function OrderManagementPage() {
     isLoadingOrders,
     ownerSetCustomerLocation,
     getCustomerLocationLabels,
+    cancelOrder,
   } = useOrderStore();
 
   const [activeFilter, setActiveFilter] =
@@ -77,6 +86,12 @@ export default function OrderManagementPage() {
     Array<{ label: string }>
   >([]);
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
 
   useEffect(() => {
     getAllOrders();
@@ -121,6 +136,31 @@ export default function OrderManagementPage() {
     }
   };
 
+  const handleCancelOrder = (order: Order) => {
+    setOrderToCancel(order);
+    setShowCancelModal(true);
+  };
+
+  const executeCancelOrder = async () => {
+    if (!orderToCancel) return;
+
+    try {
+      setActionLoading(orderToCancel.id);
+      await cancelOrder(orderToCancel.id);
+
+      setSuccess(`Order #${orderToCancel.orderNumber} cancelled successfully`);
+      setTimeout(() => setSuccess(null), 3000);
+
+      getAllOrders(); // Refresh orders list
+    } catch (err: any) {
+      setError(err.message || "Failed to cancel order");
+    } finally {
+      setActionLoading(null);
+      setOrderToCancel(null);
+      setShowCancelModal(false);
+    }
+  };
+
   function getDisplayStatus(status: string): string {
     if (status === "rider_accepted" || status === "customer_location_set")
       return "Pending";
@@ -142,6 +182,36 @@ export default function OrderManagementPage() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        {/* Success Alert */}
+        {success && (
+          <div className="mb-6 bg-green-50 border border-green-100 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+            <AlertCircle className="text-green-500 shrink-0" size={20} />
+            <p className="text-green-800 text-sm font-medium flex-1">
+              {success}
+            </p>
+            <button
+              onClick={() => setSuccess(null)}
+              className="p-1 hover:bg-green-100 rounded-lg"
+            >
+              <X className="w-4 h-4 text-green-500" />
+            </button>
+          </div>
+        )}
+
+        {/* Error Alert */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-100 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+            <AlertCircle className="text-red-500 shrink-0" size={20} />
+            <p className="text-red-800 text-sm font-medium flex-1">{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className="p-1 hover:bg-red-100 rounded-lg"
+            >
+              <X className="w-4 h-4 text-red-500" />
+            </button>
+          </div>
+        )}
+
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
@@ -222,9 +292,10 @@ export default function OrderManagementPage() {
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="hidden md:grid grid-cols-6 gap-4 p-4 bg-gray-50 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+            <div className="hidden md:grid grid-cols-7 gap-4 p-4 bg-gray-50 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
               <div>Customer</div>
               <div>Rider</div>
+              <div>Package</div>
               <div>Timeline</div>
               <div>Status</div>
               <div className="text-right">Actions</div>
@@ -239,7 +310,9 @@ export default function OrderManagementPage() {
                     setExpandedRow(expandedRow === order.id ? null : order.id)
                   }
                   onSetLocation={() => handleSetLocation(order)}
+                  onCancelOrder={() => handleCancelOrder(order)}
                   formatTimeAgo={formatTimeAgo}
+                  actionLoading={actionLoading}
                 />
               ))}
             </div>
@@ -357,6 +430,25 @@ export default function OrderManagementPage() {
           </div>
         </div>
       )}
+
+      {/* Cancellation Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showCancelModal}
+        onClose={() => {
+          setShowCancelModal(false);
+          setOrderToCancel(null);
+        }}
+        onConfirm={executeCancelOrder}
+        title="Cancel Order"
+        message={
+          orderToCancel
+            ? `Are you sure you want to cancel order #${orderToCancel.orderNumber}? This action cannot be undone.`
+            : ""
+        }
+        confirmText="Cancel Order"
+        variant="danger"
+        isLoading={!!actionLoading}
+      />
     </div>
   );
 }
@@ -366,7 +458,9 @@ function OrderRow({
   isExpanded,
   onToggle,
   onSetLocation,
+  onCancelOrder,
   formatTimeAgo,
+  actionLoading,
 }: any) {
   const statusConfig =
     statusDisplayMap[order.status as keyof typeof statusDisplayMap] ||
@@ -374,6 +468,7 @@ function OrderRow({
   const showLocationBtn =
     (order.status === "rider_accepted" || order.status === "pending") &&
     !order.customerLocationLabel;
+  const showCancelBtn = statusConfig.canCancel && order.status !== "delivered";
 
   return (
     <div
@@ -381,10 +476,8 @@ function OrderRow({
         isExpanded ? "bg-[#F9FAFB]" : "bg-white hover:bg-gray-50"
       }`}
     >
-      <div
-        className="grid grid-cols-1 md:grid-cols-6 gap-5 md:gap-4 p-5 md:p-4 items-center cursor-pointer"
-        onClick={onToggle}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-5 md:gap-4 p-5 md:p-4 items-center">
+        {/* Customer */}
         <div className="flex flex-col">
           <span className="text-[10px] text-gray-400 font-black uppercase md:hidden mb-1.5 tracking-wider">
             Customer
@@ -395,6 +488,7 @@ function OrderRow({
           </p>
         </div>
 
+        {/* Rider */}
         <div className="flex flex-col">
           <span className="text-[10px] text-gray-400 font-black uppercase md:hidden mb-1.5 tracking-wider">
             Rider
@@ -405,6 +499,17 @@ function OrderRow({
           </p>
         </div>
 
+        {/* Package Description */}
+        <div className="hidden md:flex flex-col">
+          <p
+            className="text-xs text-gray-600 truncate"
+            title={order.packageDescription}
+          >
+            {order.packageDescription || "No description"}
+          </p>
+        </div>
+
+        {/* Timeline */}
         <div className="hidden md:flex items-center gap-2 text-gray-500">
           <Clock size={16} />
           <span className="text-sm font-medium">
@@ -412,6 +517,7 @@ function OrderRow({
           </span>
         </div>
 
+        {/* Status */}
         <div className="pt-2 md:pt-0">
           <span
             className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold border shadow-sm ${statusConfig.color}`}
@@ -421,10 +527,11 @@ function OrderRow({
           </span>
         </div>
 
+        {/* Actions */}
         <div className="flex items-center justify-between md:justify-end gap-3 pt-4 md:pt-0 border-t border-gray-100 md:border-none mt-2 md:mt-0">
           <div className="md:hidden">
             <p className="text-[10px] text-gray-400 font-bold uppercase">
-              Quick Actions
+              Actions
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -434,12 +541,31 @@ function OrderRow({
                   e.stopPropagation();
                   onSetLocation();
                 }}
-                className="px-4 py-2 bg-[#00A082] text-white text-xs font-bold rounded-lg hover:opacity-90 transition-all shadow-md shadow-[#00A082]/10"
+                className="px-3 py-1.5 bg-[#00A082] text-white text-xs font-bold rounded-lg hover:opacity-90 transition-all shadow-md shadow-[#00A082]/10"
               >
                 Set Location
               </button>
             )}
+
+            {showCancelBtn && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCancelOrder();
+                }}
+                disabled={actionLoading === order.id}
+                className={`px-3 py-1.5 border cursor-pointer border-red-200 text-red-600 text-xs font-bold rounded-lg hover:bg-red-50 transition-all ${
+                  actionLoading === order.id
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                Cancel
+              </button>
+            )}
+
             <button
+              onClick={onToggle}
               className={`p-2 rounded-full cursor-pointer transition-colors ${
                 isExpanded
                   ? "bg-[#E6F4F1] text-[#00A082]"
@@ -536,9 +662,25 @@ function OrderRow({
                   No rider assigned yet
                 </p>
               )}
-              <button className="w-full mt-4 flex items-center justify-center gap-2 py-3 bg-[#E97474] cursor-pointer text-white rounded-xl text-sm transition-all shadow-lg shadow-red-50 hover:opacity-90">
-                <ExternalLink size={16} /> View Real-time Map
-              </button>
+              <div className="flex gap-2">
+                <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#E97474] cursor-pointer text-white rounded-xl text-sm transition-all shadow-lg shadow-red-50 hover:opacity-90">
+                  <ExternalLink size={16} /> Track
+                </button>
+                {showCancelBtn && (
+                  <button
+                    onClick={() => onCancelOrder()}
+                    disabled={actionLoading === order.id}
+                    className={`px-4 py-3 border cursor-pointer border-red-200 text-red-600 text-sm font-bold rounded-xl hover:bg-red-50 transition-all flex items-center gap-2 ${
+                      actionLoading === order.id
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    <Trash2 size={16} />
+                    Cancel Order
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

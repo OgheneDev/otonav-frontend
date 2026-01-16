@@ -36,6 +36,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   isCreatingRider: false,
   isCreatingCustomer: false,
   isCompletingRegistration: false,
+  isResendingCustomerInvitation: false,
 
   // Check authentication status
   checkAuth: async (): Promise<boolean> => {
@@ -478,6 +479,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 
+  // Resend riders their invitation
   resendRiderInvitation: async (riderId: string) => {
     try {
       const response = await axiosInstance.post(
@@ -560,6 +562,34 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return user;
     } catch (error: any) {
       set({ isCompletingRegistration: false });
+
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
+  },
+
+  // Resend customer invitation
+  resendCustomerInvitation: async (customerId: string) => {
+    try {
+      set({ isResendingCustomerInvitation: true });
+
+      const response = await axiosInstance.post(
+        "/auth/customer/resend-invitation",
+        {
+          customerId,
+        }
+      );
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to resend invitation");
+      }
+
+      set({ isResendingCustomerInvitation: false });
+      return response.data;
+    } catch (error: any) {
+      set({ isResendingCustomerInvitation: false });
 
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
