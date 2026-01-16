@@ -132,12 +132,12 @@ export default function CreateOrderPage() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] pb-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="mb-10">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
+        <div className="mb-10 text-center md:text-start">
+          <h1 className="text-2xl md:text-3xl font-bold  text-gray-900 tracking-tight">
             Dispatch Central
           </h1>
-          <div className="h-1 w-12 bg-[#00A082] rounded-full mt-2 mb-3" />
-          <p className="text-gray-500 mt-1">
+          <div className="h-1 w-12 hidden md:block bg-[#00A082] rounded-full mt-2 mb-3" />
+          <p className="text-gray-500 text-sm mt-1">
             Generate a new delivery request and assign a rider.
           </p>
         </div>
