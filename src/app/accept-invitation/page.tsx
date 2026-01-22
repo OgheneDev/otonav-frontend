@@ -225,25 +225,6 @@ function AcceptInvitationContent() {
                   </li>
                 ))}
               </ul>
-
-              <div className="space-y-3">
-                <div className="flex gap-3">
-                  <Link
-                    href="/orders"
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-all"
-                  >
-                    <Package className="w-4 h-4" />
-                    <span className="text-sm font-medium">View Orders</span>
-                  </Link>
-                  <Link
-                    href="/"
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-xl transition-all"
-                  >
-                    <Home className="w-4 h-4" />
-                    <span className="text-sm font-medium">Go to Dashboard</span>
-                  </Link>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="mb-8 p-5 bg-linear-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
@@ -301,20 +282,6 @@ function AcceptInvitationContent() {
               </div>
             </div>
           )}
-
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            <Link
-              href="/"
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white font-medium rounded-2xl transition-all"
-            >
-              Go to Dashboard
-              <ArrowRight size={16} />
-            </Link>
-            <p className="text-gray-500 text-xs mt-4">
-              If you have any questions, contact your organization owner
-            </p>
-          </div>
         </div>
       </div>
     );
