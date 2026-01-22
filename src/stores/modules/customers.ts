@@ -22,6 +22,7 @@ export const useCustomerStore = create<CustomerStore>((set, get) => ({
       set({ isLoadingCustomers: true });
 
       const response = await axiosInstance.get<CustomersResponse>("/customers");
+      console.log("Customers:", response);
 
       if (!response.data.success) {
         throw new Error("Failed to fetch customers");

@@ -8,6 +8,7 @@ import {
   AlertCircle,
   XCircle,
   UserPlus,
+  UserCheck,
 } from "lucide-react";
 import type { Customer } from "@/types/customer";
 import { CustomerStatusBadge } from "./CustomerStatusBadge";
@@ -46,6 +47,10 @@ export function CustomersTableRow({
   const isRegistrationLink =
     !customer.emailVerified && customer.registrationStatus === "pending";
 
+  // Check if customer is an active member of the organization
+  // Use isActive flag from the customer object
+  const isOrgMember = customer.isActive === true;
+
   return (
     <tr
       className={`flex flex-col md:table-row bg-white border border-gray-100 md:border-0 md:border-b md:border-gray-100 rounded-xl md:rounded-none hover:bg-gray-50/50 transition-all duration-200 ${
@@ -59,7 +64,7 @@ export function CustomersTableRow({
             className={`w-11 h-11 md:w-10 md:h-10 rounded-xl shrink-0 flex items-center justify-center text-base md:text-sm border-2 border-white shadow-sm ${
               isPending
                 ? "bg-yellow-50 text-yellow-600"
-                : customer.emailVerified
+                : isOrgMember
                   ? "bg-green-50 text-green-600"
                   : "bg-gray-50 text-gray-600"
             }`}
@@ -74,13 +79,20 @@ export function CustomersTableRow({
               <Mail size={12} className="text-gray-400 shrink-0" />
               <span>{customer.email}</span>
             </div>
-            {isPending && (
+            {isPending ? (
               <div className="flex items-center gap-1.5 mt-1">
                 <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
                   {hasAccount ? "Has Account" : "No Account Yet"}
                 </span>
               </div>
-            )}
+            ) : isOrgMember ? (
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                  Member since{" "}
+                  {formatDate(customer.joinedAt || customer.createdAt)}
+                </span>
+              </div>
+            ) : null}
           </div>
         </div>
       </td>
@@ -127,7 +139,9 @@ export function CustomersTableRow({
                 />
               </div>
               <span className="md:text-gray-700">
-                Created: {formatDate(customer.createdAt)}
+                {isOrgMember && customer.joinedAt
+                  ? `Joined: ${formatDate(new Date(customer.joinedAt))}`
+                  : `Created: ${formatDate(new Date(customer.createdAt))}`}
               </span>
             </>
           )}
@@ -208,23 +222,23 @@ export function CustomersTableRow({
               <div className="md:hidden flex items-center gap-1.5 px-3 py-1.5 bg-green-50 rounded-full">
                 <CheckCircle2 size={14} className="text-green-600" />
                 <span className="text-xs text-green-700">
-                  {customer.emailVerified ? "Active" : "Inactive"}
+                  {isOrgMember ? "Active Member" : "Not a Member"}
                 </span>
               </div>
               <div className="hidden md:flex items-center gap-1.5">
-                <CheckCircle2
-                  size={16}
-                  className={`${
-                    customer.emailVerified ? "text-green-500" : "text-gray-300"
-                  }`}
-                />
-                <span
-                  className={`text-sm ${
-                    customer.emailVerified ? "text-green-600" : "text-gray-400"
-                  }`}
-                >
-                  {customer.emailVerified ? "Active" : "Inactive"}
-                </span>
+                {isOrgMember ? (
+                  <>
+                    <UserCheck size={16} className="text-green-500" />
+                    <span className="text-sm text-green-600">
+                      Active Member
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 size={16} className="text-gray-300" />
+                    <span className="text-sm text-gray-400">Not a Member</span>
+                  </>
+                )}
               </div>
             </div>
           )}

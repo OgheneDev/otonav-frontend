@@ -3,12 +3,13 @@ import React from "react";
 import type { Customer } from "@/types/customer";
 import type { StatusDisplay } from "./types";
 
-export function formatDate(dateString: string | null): string {
-  if (!dateString) return "N/A";
-  return new Date(dateString).toLocaleDateString("en-US", {
-    day: "numeric",
-    month: "short",
+export function formatDate(date: string | Date) {
+  const d = typeof date === "string" ? new Date(date) : date;
+
+  return d.toLocaleDateString("en-US", {
     year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 }
 

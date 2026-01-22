@@ -12,6 +12,8 @@ export interface Customer {
     label: string;
     preciseLocation: string;
   }>;
+  isActive?: boolean;
+  joinedAt?: Date | null;
 }
 
 export interface CustomersResponse {

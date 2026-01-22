@@ -12,8 +12,6 @@ import {
   Smartphone,
   ShoppingBag,
   ArrowRight,
-  Package,
-  Home,
 } from "lucide-react";
 import { useAuthStore } from "@/stores";
 
