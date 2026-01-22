@@ -41,18 +41,15 @@ export interface CustomerStore {
   // State
   customers: Customer[];
   currentCustomer: Customer | null;
-  customerStats: CustomerStats | null;
 
   // Loading states
   isLoadingCustomers: boolean;
   isLoadingCustomer: boolean;
-  isLoadingStats: boolean;
 
   // Actions
   getAllCustomers: () => Promise<CustomersResponse>;
   getCustomerById: (customerId: string) => Promise<Customer>;
   searchCustomers: (query: string) => Promise<CustomersResponse>;
-  getCustomerStats: () => Promise<CustomerStatsResponse>;
 
   // Helper actions
   clearCustomers: () => void;

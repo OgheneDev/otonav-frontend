@@ -15,6 +15,7 @@ import {
   CompleteRiderRegistrationData,
   CompleteCustomerRegistrationData,
   AcceptInvitationData,
+  AcceptCustomerInvitationData,
   AuthUser,
   OrganizationMembership,
   Organization,
@@ -37,6 +38,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   isCreatingCustomer: false,
   isCompletingRegistration: false,
   isResendingCustomerInvitation: false,
+  isAcceptingCustomerInvitation: false,
+  isCancelingCustomerInvitation: false,
 
   // Check authentication status
   checkAuth: async (): Promise<boolean> => {
@@ -83,7 +86,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       const response = await axiosInstance.post(
         "/auth/register/business",
-        data
+        data,
       );
 
       console.log("Register business response:", response);
@@ -443,12 +446,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       const response = await axiosInstance.post(
         "/auth/rider/complete-registration",
-        data
+        data,
       );
 
       if (!response.data.success || !response.data.data) {
         throw new Error(
-          response.data.message || "Registration completion failed"
+          response.data.message || "Registration completion failed",
         );
       }
 
@@ -486,7 +489,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         "/auth/rider/resend-invitation",
         {
           riderId,
-        }
+        },
       );
 
       if (!response.data.success) {
@@ -509,7 +512,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         "/auth/rider/cancel-invitation",
         {
           riderId,
-        }
+        },
       );
 
       if (!response.data.success) {
@@ -527,19 +530,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   // Complete customer registration
   completeCustomerRegistration: async (
-    data: CompleteCustomerRegistrationData
+    data: CompleteCustomerRegistrationData,
   ) => {
     try {
       set({ isCompletingRegistration: true });
 
       const response = await axiosInstance.post(
         "/auth/customer/complete-registration",
-        data
+        data,
       );
 
       if (!response.data.success || !response.data.data) {
         throw new Error(
-          response.data.message || "Registration completion failed"
+          response.data.message || "Registration completion failed",
         );
       }
 
@@ -579,11 +582,112 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         "/auth/customer/resend-invitation",
         {
           customerId,
-        }
+        },
       );
 
       if (!response.data.success) {
         throw new Error(response.data.message || "Failed to resend invitation");
+      }
+
+      set({ isResendingCustomerInvitation: false });
+      return response.data;
+    } catch (error: any) {
+      set({ isResendingCustomerInvitation: false });
+
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
+  },
+
+  acceptCustomerInvitation: async (data: AcceptCustomerInvitationData) => {
+    try {
+      set({ isAcceptingCustomerInvitation: true });
+
+      const response = await axiosInstance.post(
+        "/auth/customer/invitation/accept",
+        data,
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(
+          response.data.message || "Failed to accept customer invitation",
+        );
+      }
+
+      const userData = response.data.data;
+      const user: AuthUser = {
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        role: userData.role || "customer",
+        emailVerified: true, // Assuming customer is already verified
+        phoneNumber: userData.phoneNumber,
+      };
+
+      set({
+        authUser: user,
+        isAcceptingCustomerInvitation: false,
+      });
+
+      return user;
+    } catch (error: any) {
+      set({ isAcceptingCustomerInvitation: false });
+
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
+  },
+
+  // Cancel customer invitation
+  cancelCustomerInvitation: async (customerId: string) => {
+    try {
+      set({ isCancelingCustomerInvitation: true });
+
+      const response = await axiosInstance.post(
+        "/auth/customer/cancel-invitation",
+        {
+          customerId,
+        },
+      );
+
+      if (!response.data.success) {
+        throw new Error(
+          response.data.message || "Failed to cancel customer invitation",
+        );
+      }
+
+      set({ isCancelingCustomerInvitation: false });
+      return response.data;
+    } catch (error: any) {
+      set({ isCancelingCustomerInvitation: false });
+
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
+  },
+
+  // Resend customer registration link (if different from invitation)
+  resendCustomerRegistrationLink: async (customerId: string) => {
+    try {
+      set({ isResendingCustomerInvitation: true });
+
+      const response = await axiosInstance.post(
+        "/auth/customer/resend-registration",
+        {
+          customerId,
+        },
+      );
+
+      if (!response.data.success) {
+        throw new Error(
+          response.data.message || "Failed to resend registration link",
+        );
       }
 
       set({ isResendingCustomerInvitation: false });
@@ -605,7 +709,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       const response = await axiosInstance.post(
         "/auth/invitation/accept",
-        data
+        data,
       );
 
       if (!response.data.success || !response.data.data) {

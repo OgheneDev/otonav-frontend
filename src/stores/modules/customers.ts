@@ -4,7 +4,6 @@ import {
   Customer,
   CustomersResponse,
   CustomerResponse,
-  CustomerStatsResponse,
   CustomerStore,
 } from "@/types/customer";
 
@@ -12,12 +11,10 @@ export const useCustomerStore = create<CustomerStore>((set, get) => ({
   // Initial state
   customers: [],
   currentCustomer: null,
-  customerStats: null,
 
   // Loading states
   isLoadingCustomers: false,
   isLoadingCustomer: false,
-  isLoadingStats: false,
 
   // Get all customers
   getAllCustomers: async () => {
@@ -56,7 +53,7 @@ export const useCustomerStore = create<CustomerStore>((set, get) => ({
       }
 
       const response = await axiosInstance.get<CustomerResponse>(
-        `/customers/${customerId}`
+        `/customers/${customerId}`,
       );
 
       if (!response.data.success || !response.data.data) {
@@ -89,7 +86,7 @@ export const useCustomerStore = create<CustomerStore>((set, get) => ({
       }
 
       const response = await axiosInstance.get<CustomersResponse>(
-        `/customers/search?query=${encodeURIComponent(query)}`
+        `/customers/search?query=${encodeURIComponent(query)}`,
       );
 
       if (!response.data.success) {
@@ -112,41 +109,11 @@ export const useCustomerStore = create<CustomerStore>((set, get) => ({
     }
   },
 
-  // Get customer statistics
-  getCustomerStats: async () => {
-    try {
-      set({ isLoadingStats: true });
-
-      const response = await axiosInstance.get<CustomerStatsResponse>(
-        "/customers/stats/overview"
-      );
-
-      if (!response.data.success) {
-        throw new Error("Failed to fetch customer statistics");
-      }
-
-      set({
-        customerStats: response.data.data,
-        isLoadingStats: false,
-      });
-
-      return response.data;
-    } catch (error: any) {
-      set({ isLoadingStats: false });
-
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
-      }
-      throw error;
-    }
-  },
-
   // Helper actions
   clearCustomers: () => {
     set({
       customers: [],
       currentCustomer: null,
-      customerStats: null,
     });
   },
 

@@ -16,8 +16,7 @@ import { useCustomers } from "./hooks/useCustomers";
 
 export default function CustomersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { customers, isLoadingCustomers, customerStats, getCustomerStats } =
-    useCustomerStore();
+  const { customers, isLoadingCustomers } = useCustomerStore();
   const {
     actionLoading,
     error,
@@ -25,6 +24,8 @@ export default function CustomersPage() {
     confirmConfig,
     loadCustomers,
     handleResendInvitation,
+    handleResendRegistration,
+    showCancelConfirmation,
     setError,
     setSuccess,
     setConfirmConfig,
@@ -32,20 +33,10 @@ export default function CustomersPage() {
 
   useEffect(() => {
     loadCustomers();
-    loadStats();
   }, []);
-
-  const loadStats = async () => {
-    try {
-      await getCustomerStats();
-    } catch (err: any) {
-      console.error("Failed to load stats:", err);
-    }
-  };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    loadStats();
     loadCustomers();
   };
 
@@ -53,7 +44,7 @@ export default function CustomersPage() {
   const calculatedStats = {
     total: customers.length,
     active: customers.filter(
-      (c) => c.emailVerified && c.registrationStatus === "completed"
+      (c) => c.emailVerified && c.registrationStatus === "completed",
     ).length,
     pending: customers.filter((c) => c.registrationStatus === "pending").length,
     verified: customers.filter((c) => c.emailVerified).length,
@@ -98,6 +89,10 @@ export default function CustomersPage() {
           customers={customers}
           actionLoading={actionLoading}
           onResendInvitation={handleResendInvitation}
+          onResendRegistration={handleResendRegistration}
+          onCancelInvitation={(customerId: string) =>
+            Promise.resolve(showCancelConfirmation(customerId, ""))
+          }
         />
       )}
 

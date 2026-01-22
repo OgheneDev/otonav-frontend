@@ -10,16 +10,16 @@ import {
   Shield,
   Building,
   Smartphone,
-  Download,
+  ShoppingBag,
   ArrowRight,
-  ExternalLink,
+  Package,
+  Home,
 } from "lucide-react";
 import { useAuthStore } from "@/stores";
 
-// Create a separate component that uses useSearchParams
 function AcceptInvitationContent() {
   const searchParams = useSearchParams();
-  const { acceptInvitation } = useAuthStore();
+  const { acceptInvitation, acceptCustomerInvitation } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -27,9 +27,17 @@ function AcceptInvitationContent() {
   const [userEmail, setUserEmail] = useState<string>("");
   const [role, setRole] = useState<string>("");
   const [orgId, setOrgId] = useState<string>("");
+  const [invitationType, setInvitationType] = useState<"rider" | "customer">(
+    "rider",
+  );
 
   useEffect(() => {
     const token = searchParams.get("token");
+    const type = searchParams.get("type") as "rider" | "customer";
+
+    if (type) {
+      setInvitationType(type);
+    }
 
     if (!token) {
       setError(
@@ -51,6 +59,10 @@ function AcceptInvitationContent() {
 
       if (payload.role) {
         setRole(payload.role);
+        // Determine invitation type based on role if not explicitly specified
+        if (!type && payload.role === "customer") {
+          setInvitationType("customer");
+        }
       }
 
       if (payload.orgId) {
@@ -79,9 +91,17 @@ function AcceptInvitationContent() {
     setError(null);
 
     try {
-      await acceptInvitation({
-        token: token,
-      });
+      if (invitationType === "customer") {
+        // Handle customer invitation
+        await acceptCustomerInvitation({
+          token: token,
+        });
+      } else {
+        // Handle rider invitation (default)
+        await acceptInvitation({
+          token: token,
+        });
+      }
 
       // Show success message
       setSuccess(true);
@@ -94,6 +114,48 @@ function AcceptInvitationContent() {
       setIsLoading(false);
     }
   };
+
+  // Get invitation details based on type
+  const getInvitationDetails = () => {
+    if (invitationType === "customer") {
+      return {
+        title: "Customer Invitation",
+        description: "You've been invited to shop with an organization",
+        icon: <ShoppingBag className="w-6 h-6 text-purple-600" />,
+        iconBg: "bg-purple-50",
+        roleLabel: "Customer",
+        badgeColor: "purple",
+        features: [
+          "Place orders with the organization",
+          "Save your favorite delivery locations",
+          "Track your orders in real-time",
+          "Manage your delivery preferences",
+        ],
+        afterAccept: "You can now place orders with this organization.",
+        ctaText: "Accept Customer Invitation",
+      };
+    } else {
+      return {
+        title: "Rider Invitation",
+        description: "You've been invited to join as a delivery rider",
+        icon: <Smartphone className="w-6 h-6 text-blue-600" />,
+        iconBg: "bg-blue-50",
+        roleLabel: "Rider",
+        badgeColor: "blue",
+        features: [
+          "View and accept delivery requests",
+          "Track deliveries in real-time",
+          "Update delivery status",
+          "View earnings and performance",
+        ],
+        afterAccept: "You can now access the rider app for deliveries.",
+        ctaText: "Accept Rider Invitation",
+        mobileAppNote: true,
+      };
+    }
+  };
+
+  const details = getInvitationDetails();
 
   if (!searchParams.get("token")) {
     return (
@@ -126,23 +188,64 @@ function AcceptInvitationContent() {
             Invitation Accepted! 🎉
           </h2>
           <p className="text-gray-600 mb-6">
-            You are now a part of{" "}
-            <span className="font-semibold">{organizationName}</span> as a{" "}
-            <span className="font-semibold capitalize">{role}</span>.
+            You are now a {details.roleLabel.toLowerCase()} of{" "}
+            <span className="font-semibold">{organizationName}</span>.
           </p>
 
           {/* Role Badge */}
           <div className="mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full">
-              <User className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-semibold text-blue-700 capitalize">
-                {role}
+            <div
+              className={`inline-flex items-center gap-2 px-4 py-2 bg-${details.badgeColor}-50 rounded-full`}
+            >
+              {details.icon}
+              <span
+                className={`text-sm font-semibold text-${details.badgeColor}-700 capitalize`}
+              >
+                {details.roleLabel}
               </span>
             </div>
           </div>
 
-          {/* Mobile App Instructions for Riders */}
-          {role === "rider" && (
+          {/* Role-specific instructions */}
+          {invitationType === "customer" ? (
+            <div className="mb-8 p-5 bg-linear-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <ShoppingBag className="w-6 h-6 text-purple-600" />
+                <h3 className="font-bold text-gray-800">Welcome Customer!</h3>
+              </div>
+              <p className="text-gray-700 mb-4 text-sm">
+                You can now place orders with {organizationName}. Here's what
+                you can do:
+              </p>
+              <ul className="text-left space-y-2 mb-4">
+                {details.features.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                    <span className="text-gray-700 text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <Link
+                    href="/orders"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-all"
+                  >
+                    <Package className="w-4 h-4" />
+                    <span className="text-sm font-medium">View Orders</span>
+                  </Link>
+                  <Link
+                    href="/"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-xl transition-all"
+                  >
+                    <Home className="w-4 h-4" />
+                    <span className="text-sm font-medium">Go to Dashboard</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
             <div className="mb-8 p-5 bg-linear-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Smartphone className="w-6 h-6 text-blue-600" />
@@ -155,30 +258,12 @@ function AcceptInvitationContent() {
                 where you can:
               </p>
               <ul className="text-left space-y-2 mb-4">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-                  <span className="text-gray-700 text-sm">
-                    View and accept delivery requests
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-                  <span className="text-gray-700 text-sm">
-                    Track your deliveries in real-time
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-                  <span className="text-gray-700 text-sm">
-                    Update delivery status
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-                  <span className="text-gray-700 text-sm">
-                    View earnings and performance
-                  </span>
-                </li>
+                {details.features.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                    <span className="text-gray-700 text-sm">{feature}</span>
+                  </li>
+                ))}
               </ul>
 
               <div className="space-y-3">
@@ -217,22 +302,15 @@ function AcceptInvitationContent() {
             </div>
           )}
 
-          {/* General Instructions for Other Roles */}
-          {role !== "rider" && (
-            <div className="mb-8 p-5 bg-gray-50 rounded-2xl">
-              <p className="text-gray-700 mb-4 text-sm">
-                You can now access the organization's resources. Check your
-                email for further instructions on getting started.
-              </p>
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-                <ExternalLink className="w-4 h-4" />
-                <span>You'll receive access details shortly</span>
-              </div>
-            </div>
-          )}
-
           {/* Action Buttons */}
           <div className="space-y-3">
+            <Link
+              href="/"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white font-medium rounded-2xl transition-all"
+            >
+              Go to Dashboard
+              <ArrowRight size={16} />
+            </Link>
             <p className="text-gray-500 text-xs mt-4">
               If you have any questions, contact your organization owner
             </p>
@@ -248,16 +326,16 @@ function AcceptInvitationContent() {
         {/* Header */}
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
-              <Building className="w-6 h-6 text-blue-600" />
+            <div
+              className={`w-12 h-12 rounded-2xl ${details.iconBg} flex items-center justify-center`}
+            >
+              {details.icon}
             </div>
             <h1 className="text-3xl font-bold text-gray-800">
-              Organization Invitation
+              {details.title}
             </h1>
           </div>
-          <p className="text-gray-600 font-medium">
-            You've been invited to join an organization
-          </p>
+          <p className="text-gray-600 font-medium">{details.description}</p>
 
           {/* Email display */}
           {userEmail && (
@@ -271,10 +349,14 @@ function AcceptInvitationContent() {
 
           {/* Role display */}
           {role && (
-            <div className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full">
-              <Shield className="w-4 h-4 text-blue-600" />
-              <span className="text-sm text-blue-700 font-medium">
-                {role.charAt(0).toUpperCase() + role.slice(1)} Role
+            <div
+              className={`mt-2 inline-flex items-center gap-2 px-4 py-2 bg-${details.badgeColor}-50 rounded-full`}
+            >
+              <Shield className={`w-4 h-4 text-${details.badgeColor}-600`} />
+              <span
+                className={`text-sm text-${details.badgeColor}-700 font-medium`}
+              >
+                {details.roleLabel} Role
               </span>
             </div>
           )}
@@ -294,34 +376,52 @@ function AcceptInvitationContent() {
                     Join {organizationName}
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    Accept the invitation to become a team member
+                    Accept the invitation to become a{" "}
+                    {details.roleLabel.toLowerCase()}
                   </p>
                 </div>
               </div>
 
               {/* Invitation Details */}
-              <div className="bg-blue-50 rounded-2xl p-4 mb-6">
+              <div
+                className={`bg-${details.badgeColor}-50 rounded-2xl p-4 mb-6`}
+              >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600 text-sm">Role</span>
-                    <span className="font-semibold text-blue-700 capitalize">
-                      {role || "Member"}
+                    <span
+                      className={`font-semibold text-${details.badgeColor}-700 capitalize`}
+                    >
+                      {details.roleLabel}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600 text-sm">Access Level</span>
                     <span className="font-semibold text-gray-800">
-                      Team Member
+                      {invitationType === "customer"
+                        ? "Customer"
+                        : "Team Member"}
                     </span>
                   </div>
-                  {role === "rider" && (
-                    <div className="pt-3 border-t border-blue-100">
-                      <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <Smartphone className="w-4 h-4" />
-                        <span>Primary interface: Mobile App</span>
-                      </div>
-                    </div>
-                  )}
+
+                  {/* Features */}
+                  <div className="pt-3 border-t border-blue-100">
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Benefits:
+                    </p>
+                    <ul className="space-y-2">
+                      {details.features.map((feature, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle
+                            className={`w-4 h-4 text-${details.badgeColor}-500 mt-0.5 shrink-0`}
+                          />
+                          <span className="text-gray-700 text-sm">
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -340,7 +440,7 @@ function AcceptInvitationContent() {
               <button
                 onClick={handleAcceptInvitation}
                 disabled={isLoading}
-                className="w-full flex items-center cursor-pointer justify-center gap-3 px-6 py-4 bg-[#FF7B7B] hover:bg-[#ff6a6a] text-white font-bold rounded-2xl transition-all shadow-lg shadow-red-100 hover:shadow-xl hover:shadow-red-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                className={`w-full flex items-center cursor-pointer justify-center gap-3 px-6 py-4 bg-[#FF7B7B] hover:bg-[#ff6a6a] text-white font-bold rounded-2xl transition-all shadow-lg shadow-red-100 hover:shadow-xl hover:shadow-red-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed`}
               >
                 {isLoading ? (
                   <>
@@ -349,7 +449,7 @@ function AcceptInvitationContent() {
                   </>
                 ) : (
                   <>
-                    <span>Accept Invitation</span>
+                    <span>{details.ctaText}</span>
                     <ArrowRight size={20} />
                   </>
                 )}
@@ -364,9 +464,26 @@ function AcceptInvitationContent() {
               </button>
             </div>
 
-            {/* Mobile App Info for Riders */}
-            {role === "rider" && (
-              <div className="mt-8 p-4 bg-linear-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+            {/* Role-specific notes */}
+            {invitationType === "customer" ? (
+              <div className="mt-8 p-4 bg-purple-50 rounded-2xl border border-purple-100">
+                <div className="flex items-start gap-3">
+                  <ShoppingBag className="w-5 h-5 text-purple-600 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm text-purple-800 font-medium mb-1">
+                      Note for Customers
+                    </p>
+                    <p className="text-xs text-purple-600">
+                      By accepting this invitation, you'll be able to place
+                      orders with {organizationName}. You can manage your
+                      delivery addresses, track orders, and save your
+                      preferences.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-8 p-4 bg-blue-50 rounded-2xl border border-blue-100">
                 <div className="flex items-start gap-3">
                   <Smartphone className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
                   <div>
@@ -384,24 +501,22 @@ function AcceptInvitationContent() {
               </div>
             )}
 
-            {/* Security Note for Others */}
-            {role !== "rider" && role !== "" && (
-              <div className="mt-8 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <div className="flex items-start gap-3">
-                  <Shield className="w-5 h-5 text-gray-600 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm text-gray-800 font-medium mb-1">
-                      What happens next?
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      By accepting this invitation, you'll gain access to the
-                      organization's dashboard and resources. You can leave the
-                      organization at any time.
-                    </p>
-                  </div>
+            {/* General Security Note */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+              <div className="flex items-start gap-3">
+                <Shield className="w-5 h-5 text-gray-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm text-gray-800 font-medium mb-1">
+                    What happens next?
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    By accepting this invitation, you'll gain access to the
+                    organization's resources. You can leave the organization at
+                    any time.
+                  </p>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
 

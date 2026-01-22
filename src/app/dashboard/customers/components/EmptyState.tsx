@@ -14,12 +14,12 @@ export function EmptyState({ onCreateCustomer }: EmptyStateProps) {
         <p className="text-gray-500 text-lg font-semibold">
           No customers found
         </p>
-        <p className="text-gray-400 text-sm max-w-xs mt-1">
+        <p className="text-gray-500 text-sm max-w-xs mt-1">
           Customers will appear here when they register.
         </p>
         <button
           onClick={onCreateCustomer}
-          className="mt-6 px-6 py-3 bg-[#FF7B7B] hover:bg-[#ff6a6a] text-white text-sm rounded-xl transition-all shadow-lg shadow-red-100"
+          className="mt-6 px-6 py-3 cursor-pointer bg-[#FF7B7B] hover:bg-[#ff6a6a] text-white text-sm rounded-xl transition-all shadow-lg shadow-red-100"
         >
           Create First Customer
         </button>

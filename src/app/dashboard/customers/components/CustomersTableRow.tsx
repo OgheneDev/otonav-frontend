@@ -6,6 +6,8 @@ import {
   RotateCw,
   CheckCircle2,
   AlertCircle,
+  XCircle,
+  UserPlus,
 } from "lucide-react";
 import type { Customer } from "@/types/customer";
 import { CustomerStatusBadge } from "./CustomerStatusBadge";
@@ -20,17 +22,29 @@ interface CustomersTableRowProps {
   customer: Customer;
   actionLoading: string | null;
   onResendInvitation: (customerId: string) => Promise<void>;
+  onResendRegistration: (customerId: string) => Promise<void>;
+  onCancelInvitation: (customerId: string) => Promise<void>;
 }
 
 export function CustomersTableRow({
   customer,
   actionLoading,
   onResendInvitation,
+  onResendRegistration,
+  onCancelInvitation,
 }: CustomersTableRowProps) {
   const status = getStatusDisplay(customer);
-  const isActionLoading = actionLoading === customer.id;
+  const isActionLoading = actionLoading?.includes(customer.id);
   const isPending = isPendingCustomer(customer);
   const isExpired = isInvitationExpired(customer.createdAt);
+
+  // Check if user has an account (emailVerified and registrationStatus completed)
+  const hasAccount =
+    customer.emailVerified && customer.registrationStatus === "completed";
+
+  // Check if it's a registration link (no account yet)
+  const isRegistrationLink =
+    !customer.emailVerified && customer.registrationStatus === "pending";
 
   return (
     <tr
@@ -46,8 +60,8 @@ export function CustomersTableRow({
               isPending
                 ? "bg-yellow-50 text-yellow-600"
                 : customer.emailVerified
-                ? "bg-green-50 text-green-600"
-                : "bg-gray-50 text-gray-600"
+                  ? "bg-green-50 text-green-600"
+                  : "bg-gray-50 text-gray-600"
             }`}
           >
             {customer.name?.[0] || customer.email?.[0]?.toUpperCase() || "C"}
@@ -60,6 +74,13 @@ export function CustomersTableRow({
               <Mail size={12} className="text-gray-400 shrink-0" />
               <span>{customer.email}</span>
             </div>
+            {isPending && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                  {hasAccount ? "Has Account" : "No Account Yet"}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </td>
@@ -117,27 +138,71 @@ export function CustomersTableRow({
       <td className="px-5 py-4 md:px-6 md:py-5 bg-gray-50/50 md:bg-transparent mt-2 md:mt-0 rounded-b-xl md:rounded-none">
         <div className="flex items-center justify-end gap-5 md:gap-3 flex-wrap">
           {isPending ? (
-            <button
-              onClick={() => onResendInvitation(customer.id)}
-              disabled={isActionLoading || isExpired}
-              className={`flex items-center gap-2 cursor-pointer transition-all group ${
-                isActionLoading || isExpired
-                  ? "opacity-30 cursor-not-allowed"
-                  : "text-blue-500 hover:text-blue-600"
-              }`}
-              title={isExpired ? "Invitation expired" : "Resend invitation"}
-            >
-              <div className="md:p-2 md:bg-blue-50 md:rounded-lg md:group-hover:bg-blue-100 transition-colors">
-                <RotateCw
-                  size={18}
-                  strokeWidth={1.5}
-                  className={isActionLoading ? "animate-spin" : ""}
-                />
-              </div>
-              <span className="md:hidden text-xs uppercase tracking-wider">
-                {isActionLoading ? "Sending..." : "Resend"}
-              </span>
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Resend Button */}
+              <button
+                onClick={() =>
+                  hasAccount
+                    ? onResendInvitation(customer.id)
+                    : onResendRegistration(customer.id)
+                }
+                disabled={isActionLoading || isExpired}
+                className={`flex items-center gap-2 cursor-pointer transition-all group ${
+                  isActionLoading || isExpired
+                    ? "opacity-30 cursor-not-allowed"
+                    : "text-blue-500 hover:text-blue-600"
+                }`}
+                title={
+                  isExpired
+                    ? "Invitation expired"
+                    : hasAccount
+                      ? "Resend invitation to existing user"
+                      : "Resend registration link"
+                }
+              >
+                <div className="md:p-2 md:bg-blue-50 md:rounded-lg md:group-hover:bg-blue-100 transition-colors">
+                  {hasAccount ? (
+                    <RotateCw
+                      size={18}
+                      strokeWidth={1.5}
+                      className={isActionLoading ? "animate-spin" : ""}
+                    />
+                  ) : (
+                    <UserPlus
+                      size={18}
+                      strokeWidth={1.5}
+                      className={isActionLoading ? "animate-spin" : ""}
+                    />
+                  )}
+                </div>
+                <span className="md:hidden text-xs uppercase tracking-wider">
+                  {isActionLoading
+                    ? "Sending..."
+                    : hasAccount
+                      ? "Resend Invite"
+                      : "Resend Registration"}
+                </span>
+              </button>
+
+              {/* Cancel Button */}
+              <button
+                onClick={() => onCancelInvitation(customer.id)}
+                disabled={isActionLoading}
+                className={`flex items-center gap-2 cursor-pointer transition-all group ${
+                  isActionLoading
+                    ? "opacity-30 cursor-not-allowed"
+                    : "text-red-500 hover:text-red-600"
+                }`}
+                title="Cancel invitation"
+              >
+                <div className="md:p-2 md:bg-red-50 md:rounded-lg md:group-hover:bg-red-100 transition-colors">
+                  <XCircle size={18} strokeWidth={1.5} />
+                </div>
+                <span className="md:hidden text-xs uppercase tracking-wider">
+                  Cancel
+                </span>
+              </button>
+            </div>
           ) : (
             <div className="flex items-center gap-2">
               <div className="md:hidden flex items-center gap-1.5 px-3 py-1.5 bg-green-50 rounded-full">

@@ -13,7 +13,7 @@ export function CustomersHeader({ onCreateCustomer }: CustomersHeaderProps) {
         </h2>
         <div className="h-1 w-12 hidden md:block bg-[#00A082] rounded-full mt-2 mb-3" />
         <p className="text-gray-500 text-sm mt-1">
-          View all customers on the platform
+          View all customers in your organization.
         </p>
       </section>
 

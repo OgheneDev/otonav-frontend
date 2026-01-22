@@ -5,12 +5,16 @@ interface CustomersTableProps {
   customers: Customer[];
   actionLoading: string | null;
   onResendInvitation: (customerId: string) => Promise<void>;
+  onResendRegistration: (customerId: string) => Promise<void>;
+  onCancelInvitation: (customerId: string) => Promise<void>;
 }
 
 export function CustomersTable({
   customers,
   actionLoading,
   onResendInvitation,
+  onResendRegistration,
+  onCancelInvitation,
 }: CustomersTableProps) {
   return (
     <div className="bg-white md:rounded-4xl md:border border-gray-100 md:shadow-sm overflow-hidden">
@@ -42,6 +46,8 @@ export function CustomersTable({
                 customer={customer}
                 actionLoading={actionLoading}
                 onResendInvitation={onResendInvitation}
+                onResendRegistration={onResendRegistration}
+                onCancelInvitation={onCancelInvitation}
               />
             ))}
           </tbody>

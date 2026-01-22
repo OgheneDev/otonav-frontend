@@ -108,6 +108,20 @@ export interface AcceptInvitationData {
   token: string;
 }
 
+export interface AcceptCustomerInvitationData {
+  token: string;
+}
+
+export interface CustomerInvitationActions {
+  acceptCustomerInvitation: (
+    data: AcceptCustomerInvitationData,
+  ) => Promise<AuthUser>;
+  resendCustomerInvitation: (customerId: string) => Promise<any>;
+  cancelCustomerInvitation: (customerId: string) => Promise<any>;
+  isAcceptingCustomerInvitation?: boolean; // NEW state
+  isCancelingCustomerInvitation?: boolean; // NEW state
+}
+
 export interface AuthStore {
   // State
   authUser: AuthUser | null;
@@ -125,6 +139,8 @@ export interface AuthStore {
   isCreatingCustomer: boolean;
   isCompletingRegistration: boolean;
   isResendingCustomerInvitation: boolean; // NEW
+  isAcceptingCustomerInvitation: boolean; // NEW
+  isCancelingCustomerInvitation: boolean; // NEW
 
   // Actions
   checkAuth: () => Promise<boolean>;
@@ -146,7 +162,9 @@ export interface AuthStore {
   createCustomer: (data: CustomerCreationData) => Promise<any>;
   resendRiderInvitation: (riderId: string) => Promise<any>;
   resendCustomerInvitation: (customerId: string) => Promise<any>; // NEW
+  resendCustomerRegistrationLink: (customerId: string) => Promise<any>; // NEW
   cancelRiderInvitation: (riderId: string) => Promise<any>;
+  cancelCustomerInvitation: (customerId: string) => Promise<any>; // NEW
   completeRiderRegistration: (
     data: CompleteRiderRegistrationData,
   ) => Promise<AuthUser>;
@@ -154,6 +172,9 @@ export interface AuthStore {
     data: CompleteCustomerRegistrationData,
   ) => Promise<AuthUser>;
   acceptInvitation: (data: AcceptInvitationData) => Promise<AuthUser>;
+  acceptCustomerInvitation: (
+    data: AcceptCustomerInvitationData,
+  ) => Promise<AuthUser>; // NEW
 
   // Helper actions
   clearAuth: () => void;

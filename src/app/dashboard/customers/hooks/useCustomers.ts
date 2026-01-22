@@ -16,7 +16,11 @@ export function useCustomers() {
   });
 
   const { getAllCustomers } = useCustomerStore();
-  const { resendCustomerInvitation } = useAuthStore();
+  const {
+    resendCustomerInvitation,
+    resendCustomerRegistrationLink,
+    cancelCustomerInvitation,
+  } = useAuthStore();
 
   const loadCustomers = useCallback(async () => {
     try {
@@ -30,7 +34,7 @@ export function useCustomers() {
   const handleResendInvitation = useCallback(
     async (customerId: string) => {
       try {
-        setActionLoading(`resend-${customerId}`);
+        setActionLoading(`resend-invite-${customerId}`);
         await resendCustomerInvitation(customerId);
         setSuccess("Invitation resent successfully");
         setTimeout(() => setSuccess(null), 3000);
@@ -40,7 +44,55 @@ export function useCustomers() {
         setActionLoading(null);
       }
     },
-    [resendCustomerInvitation]
+    [resendCustomerInvitation],
+  );
+
+  const handleResendRegistration = useCallback(
+    async (customerId: string) => {
+      try {
+        setActionLoading(`resend-reg-${customerId}`);
+        await resendCustomerRegistrationLink(customerId);
+        setSuccess("Registration link resent successfully");
+        setTimeout(() => setSuccess(null), 3000);
+      } catch (err: any) {
+        setError(err.message || "Failed to resend registration link");
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [resendCustomerRegistrationLink],
+  );
+
+  const handleCancelInvitation = useCallback(
+    async (customerId: string) => {
+      try {
+        setActionLoading(`cancel-${customerId}`);
+        await cancelCustomerInvitation(customerId);
+        setSuccess("Invitation cancelled successfully");
+        setTimeout(() => setSuccess(null), 3000);
+        // Reload customers after cancellation
+        await getAllCustomers();
+      } catch (err: any) {
+        setError(err.message || "Failed to cancel invitation");
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [cancelCustomerInvitation, getAllCustomers],
+  );
+
+  const showCancelConfirmation = useCallback(
+    (customerId: string, customerName: string) => {
+      setConfirmConfig({
+        isOpen: true,
+        title: "Cancel Invitation",
+        message: `Are you sure you want to cancel the invitation for ${customerName}? This action cannot be undone.`,
+        confirmText: "Cancel Invitation",
+        variant: "danger",
+        onConfirm: () => handleCancelInvitation(customerId),
+      });
+    },
+    [handleCancelInvitation],
   );
 
   return {
@@ -50,6 +102,8 @@ export function useCustomers() {
     confirmConfig,
     loadCustomers,
     handleResendInvitation,
+    handleResendRegistration,
+    showCancelConfirmation,
     setError,
     setSuccess,
     setConfirmConfig,
