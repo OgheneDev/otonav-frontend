@@ -36,6 +36,7 @@ export interface BusinessRegistrationData {
   password: string;
   name: string;
   businessName: string;
+  businessAddress: string;
   phoneNumber: string;
 }
 
@@ -128,7 +129,7 @@ export interface AuthStore {
   // Actions
   checkAuth: () => Promise<boolean>;
   registerBusiness: (
-    data: BusinessRegistrationData
+    data: BusinessRegistrationData,
   ) => Promise<{ user: AuthUser; organization: Organization }>;
   login: (data: LoginData) => Promise<LoginResponse>;
   logout: () => Promise<void>;
@@ -147,10 +148,10 @@ export interface AuthStore {
   resendCustomerInvitation: (customerId: string) => Promise<any>; // NEW
   cancelRiderInvitation: (riderId: string) => Promise<any>;
   completeRiderRegistration: (
-    data: CompleteRiderRegistrationData
+    data: CompleteRiderRegistrationData,
   ) => Promise<AuthUser>;
   completeCustomerRegistration: (
-    data: CompleteCustomerRegistrationData
+    data: CompleteCustomerRegistrationData,
   ) => Promise<AuthUser>;
   acceptInvitation: (data: AcceptInvitationData) => Promise<AuthUser>;
 

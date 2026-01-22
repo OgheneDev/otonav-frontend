@@ -7,6 +7,7 @@ import {
   Lock,
   Building2,
   Phone,
+  MapPin,
   ArrowRight,
   Eye,
   EyeOff,
@@ -25,6 +26,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     name: "",
     businessName: "",
+    businessAddress: "",
     email: "",
     password: "",
     phoneNumber: "",
@@ -98,6 +100,12 @@ export default function Register() {
       return false;
     }
 
+    // Validate business address
+    if (!formData.businessAddress.trim()) {
+      showToast("Please enter your business address", "error");
+      return false;
+    }
+
     // Validate email
     if (!formData.email.trim()) {
       showToast("Please enter your email address", "error");
@@ -150,12 +158,13 @@ export default function Register() {
         password: formData.password,
         name: formData.name.trim(),
         businessName: formData.businessName.trim(),
+        businessAddress: formData.businessAddress.trim(),
         phoneNumber: formattedPhoneNumber, // Now in +234 format
       });
 
       showToast(
         "Registration successful! Please check your email for verification OTP.",
-        "success"
+        "success",
       );
 
       // Store email and user type in localStorage for verification page
@@ -264,6 +273,35 @@ export default function Register() {
                 autoComplete="organization"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Business Address */}
+        <div className="space-y-2">
+          <label
+            htmlFor="businessAddress"
+            className="text-sm font-semibold text-gray-700 pl-1"
+          >
+            Business Address *
+            <span className="text-xs text-gray-500 ml-1 font-normal">
+              (Physical location of your business)
+            </span>
+          </label>
+          <div className="relative group">
+            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 transition-colors group-focus-within:text-[#FF6B6B]" />
+            <input
+              id="businessAddress"
+              type="text"
+              value={formData.businessAddress}
+              onChange={(e) =>
+                setFormData({ ...formData, businessAddress: e.target.value })
+              }
+              onKeyPress={handleKeyPress}
+              placeholder="123 Business St, City, State"
+              className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FF6B6B]/30 focus:border-[#FF6B6B] focus:bg-white transition-all outline-none text-gray-900 placeholder:text-gray-400 disabled:opacity-50"
+              disabled={isSigningUp}
+              autoComplete="street-address"
+            />
           </div>
         </div>
 
@@ -392,8 +430,8 @@ export default function Register() {
                     passwordStrength.label === "Strong"
                       ? "text-green-600"
                       : passwordStrength.label === "Medium"
-                      ? "text-yellow-600"
-                      : "text-red-600"
+                        ? "text-yellow-600"
+                        : "text-red-600"
                   }`}
                 >
                   {passwordStrength.label}
