@@ -46,14 +46,14 @@ function CompleteRegistrationContent() {
 
     if (!token || !type) {
       setError(
-        "Invalid registration link. Please check your email for the correct link."
+        "Invalid registration link. Please check your email for the correct link.",
       );
       return;
     }
 
     if (type !== "rider" && type !== "customer") {
       setError(
-        "Invalid registration type. Please use a valid registration link."
+        "Invalid registration type. Please use a valid registration link.",
       );
       return;
     }
@@ -71,7 +71,7 @@ function CompleteRegistrationContent() {
       }
     } catch (err) {
       console.warn(
-        "Could not decode token, continuing without pre-filled data"
+        "Could not decode token, continuing without pre-filled data",
       );
     }
 
@@ -196,7 +196,7 @@ function CompleteRegistrationContent() {
     } catch (err: any) {
       setError(
         err.message ||
-          `Failed to complete ${formData.type} registration. Please try again.`
+          `Failed to complete ${formData.type} registration. Please try again.`,
       );
     } finally {
       setIsLoading(false);
@@ -273,12 +273,6 @@ function CompleteRegistrationContent() {
             The registration link is invalid or has expired. Please check your
             email for the correct link or contact support.
           </p>
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center px-6 py-3 bg-[#FF7B7B] hover:bg-[#ff6a6a] text-white font-semibold rounded-xl transition-all shadow-lg shadow-red-100 active:scale-95"
-          >
-            Return to Home
-          </Link>
         </div>
       </div>
     );

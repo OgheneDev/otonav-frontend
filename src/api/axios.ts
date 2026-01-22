@@ -94,7 +94,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor
@@ -110,7 +110,7 @@ axiosInstance.interceptors.response.use(
 
       tokenStorage.setAccessToken(
         response.data.data.accessToken,
-        isAuthRequest
+        isAuthRequest,
       );
 
       // Note: Your API might send refresh token in cookies instead
@@ -140,18 +140,18 @@ axiosInstance.interceptors.response.use(
           "/auth/refresh-token",
           {
             refreshToken,
-          }
+          },
         );
 
         if (refreshResponse.data.data?.accessToken) {
           // Store new tokens
           tokenStorage.setAccessToken(
             refreshResponse.data.data.accessToken,
-            true
+            true,
           );
           if (refreshResponse.data.data.refreshToken) {
             tokenStorage.setRefreshToken(
-              refreshResponse.data.data.refreshToken
+              refreshResponse.data.data.refreshToken,
             );
           }
 
@@ -171,7 +171,7 @@ axiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;

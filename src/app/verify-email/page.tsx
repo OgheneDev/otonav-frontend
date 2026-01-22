@@ -23,7 +23,7 @@ export default function VerifyEmail() {
   const [countdown, setCountdown] = useState(0);
   const [verificationSuccess, setVerificationSuccess] = useState(false);
   const [userType, setUserType] = useState<"business" | "rider" | "customer">(
-    "business"
+    "business",
   ); // Default to business
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -117,7 +117,7 @@ export default function VerifyEmail() {
       showToast(
         error.message ||
           "Verification failed. Please check the OTP and try again.",
-        "error"
+        "error",
       );
     }
   };
@@ -168,7 +168,7 @@ export default function VerifyEmail() {
     } catch (error: any) {
       showToast(
         error.message || "Failed to resend OTP. Please try again.",
-        "error"
+        "error",
       );
     } finally {
       setIsResending(false);
@@ -268,14 +268,6 @@ export default function VerifyEmail() {
               </p>
             </div>
           </div>
-
-          {/* Return to Home */}
-          <Link
-            href="/"
-            className="block w-full text-center px-4 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all"
-          >
-            Return to Homepage
-          </Link>
         </div>
       </AuthLayout>
     );

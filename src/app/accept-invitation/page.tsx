@@ -33,7 +33,7 @@ function AcceptInvitationContent() {
 
     if (!token) {
       setError(
-        "Invalid invitation link. Please check your email for the correct link."
+        "Invalid invitation link. Please check your email for the correct link.",
       );
       return;
     }
@@ -62,7 +62,7 @@ function AcceptInvitationContent() {
       setOrganizationName("the organization");
     } catch (err) {
       console.warn(
-        "Could not decode token, continuing without pre-filled data"
+        "Could not decode token, continuing without pre-filled data",
       );
     }
   }, [searchParams]);
@@ -88,7 +88,7 @@ function AcceptInvitationContent() {
     } catch (err: any) {
       setError(
         err.message ||
-          "Failed to accept invitation. Please try again or contact support."
+          "Failed to accept invitation. Please try again or contact support.",
       );
     } finally {
       setIsLoading(false);
@@ -110,12 +110,6 @@ function AcceptInvitationContent() {
             email for the correct link or contact the organization
             administrator.
           </p>
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center px-6 py-3 bg-[#FF7B7B] hover:bg-[#ff6a6a] text-white font-semibold rounded-xl transition-all shadow-lg shadow-red-100 active:scale-95"
-          >
-            Return to Home
-          </Link>
         </div>
       </div>
     );
@@ -239,14 +233,8 @@ function AcceptInvitationContent() {
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center w-full px-6 py-3 bg-[#FF7B7B] hover:bg-[#ff6a6a] text-white font-semibold rounded-xl transition-all shadow-lg shadow-red-100 active:scale-95"
-            >
-              Return to Home
-            </Link>
             <p className="text-gray-500 text-xs mt-4">
-              If you have any questions, contact your organization administrator
+              If you have any questions, contact your organization owner
             </p>
           </div>
         </div>
