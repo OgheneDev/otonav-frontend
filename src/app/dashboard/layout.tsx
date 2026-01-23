@@ -7,13 +7,13 @@ import {
   Package,
   Bike,
   Users,
-  BadgeDollarSign,
   Settings,
   Menu,
   X,
   Search,
   Bell,
   ChevronRight,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -46,6 +46,38 @@ export default function DashboardLayout({
       return pathname === "/dashboard";
     }
     return pathname.startsWith(href);
+  };
+
+  // Get profile image or fallback
+  const getProfileImage = () => {
+    if (authUser?.profileImage) {
+      return (
+        <img
+          src={authUser.profileImage}
+          alt={authUser?.name || "User"}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            // If image fails to load, show fallback
+            const target = e.target as HTMLImageElement;
+            target.style.display = "none";
+            const parent = target.parentElement;
+            if (parent) {
+              const fallback = parent.querySelector(".profile-fallback");
+              if (fallback) {
+                (fallback as HTMLElement).style.display = "flex";
+              }
+            }
+          }}
+        />
+      );
+    }
+
+    // Return fallback icon if no profile image
+    return (
+      <div className="profile-fallback w-full h-full flex items-center justify-center bg-gray-300">
+        <User size={20} className="text-gray-600" />
+      </div>
+    );
   };
 
   return (
@@ -187,11 +219,7 @@ export default function DashboardLayout({
                 <p className="text-sm text-gray-800">{authUser?.name}</p>
               </div>
               <div className="w-10 h-10 rounded-full bg-linear-to-br from-gray-200 to-gray-300 border-2 border-white shadow-md overflow-hidden ring-2 ring-gray-100 group-hover:ring-[#00A082] transition-all">
-                <img
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150"
-                  alt="User"
-                  className="w-full h-full object-cover"
-                />
+                {getProfileImage()}
               </div>
             </div>
           </div>

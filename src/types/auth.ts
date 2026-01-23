@@ -24,6 +24,7 @@ export interface AuthUser {
   defaultOrgRole?: string;
   createdAt?: string;
   lastLoginAt?: string;
+  profileImage?: string;
 
   // Organization details for owners/riders
   organizations?: OrganizationDetail[];
@@ -76,6 +77,7 @@ export interface UpdateProfileData {
   name?: string;
   email?: string;
   phoneNumber?: string;
+  profileImage?: string;
 }
 
 export interface ChangePasswordData {
