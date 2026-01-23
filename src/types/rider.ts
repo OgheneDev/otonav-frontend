@@ -1,10 +1,10 @@
-// types/rider.ts - UPDATED
 export interface Rider {
   id: string;
   email: string;
   name?: string | null;
   globalRole: string;
   phoneNumber?: string | null;
+  profileImage?: string | null;
   emailVerified: boolean;
   lastLoginAt?: string | null;
   createdAt: string;
@@ -127,14 +127,14 @@ export interface RiderStore {
 
   suspendRider: (
     riderId: string,
-    data?: RiderSuspensionInput
+    data?: RiderSuspensionInput,
   ) => Promise<OperationResponse>;
 
   unsuspendRider: (riderId: string) => Promise<OperationResponse>;
 
   removeRider: (
     riderId: string,
-    data?: RiderRemovalInput
+    data?: RiderRemovalInput,
   ) => Promise<RemoveRiderResponse>;
 
   checkSuspensionStatus: (riderId: string) => Promise<SuspensionStatusResponse>;

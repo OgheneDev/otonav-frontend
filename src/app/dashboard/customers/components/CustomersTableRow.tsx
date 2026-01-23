@@ -9,6 +9,7 @@ import {
   XCircle,
   UserPlus,
   UserCheck,
+  User,
 } from "lucide-react";
 import type { Customer } from "@/types/customer";
 import { CustomerStatusBadge } from "./CustomerStatusBadge";
@@ -51,25 +52,49 @@ export function CustomersTableRow({
   // Use isActive flag from the customer object
   const isOrgMember = customer.isActive === true;
 
+  // Check if customer has a profile image
+  const hasProfileImage = !!customer.profileImage;
+  const profileImageUrl = customer.profileImage || undefined;
+
   return (
     <tr
       className={`flex flex-col md:table-row bg-white border border-gray-100 md:border-0 md:border-b md:border-gray-100 rounded-xl md:rounded-none hover:bg-gray-50/50 transition-all duration-200 ${
         isExpired && isPending ? "opacity-60" : ""
       }`}
     >
-      {/* Name & Avatar */}
+      {/* Name & Profile Image */}
       <td className="px-5 py-4 md:px-6 md:py-5">
         <div className="flex items-center gap-3.5">
           <div
-            className={`w-11 h-11 md:w-10 md:h-10 rounded-xl shrink-0 flex items-center justify-center text-base md:text-sm border-2 border-white shadow-sm ${
-              isPending
-                ? "bg-yellow-50 text-yellow-600"
-                : isOrgMember
-                  ? "bg-green-50 text-green-600"
-                  : "bg-gray-50 text-gray-600"
+            className={`w-11 h-11 md:w-10 md:h-10 rounded-xl shrink-0 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden ${
+              hasProfileImage ? "" : "bg-gray-100"
             }`}
           >
-            {customer.name?.[0] || customer.email?.[0]?.toUpperCase() || "C"}
+            {hasProfileImage ? (
+              <img
+                src={profileImageUrl}
+                alt={customer.name || customer.email}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback to icon if image fails to load
+                  e.currentTarget.style.display = "none";
+                  const parent = e.currentTarget.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `
+                      <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                      </div>
+                    `;
+                  }
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                <User size={20} className="text-gray-400" strokeWidth={1.5} />
+              </div>
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-gray-800 text-sm md:text-sm truncate mb-0.5">

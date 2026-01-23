@@ -3,6 +3,7 @@ export interface Customer {
   email: string;
   name: string | null;
   phoneNumber: string | null;
+  profileImage?: string | null;
   emailVerified: boolean;
   registrationCompleted: boolean | null;
   registrationStatus: "pending" | "completed" | "cancelled" | "expired" | null;
