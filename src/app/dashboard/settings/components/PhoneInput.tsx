@@ -9,18 +9,13 @@ interface PhoneInputProps {
 export function PhoneInput({
   value,
   onChange,
-  maxLength = 11,
+  maxLength = 10, // Changed to 10 since we only want 10 digits (without leading 0)
 }: PhoneInputProps) {
-  const formatPhoneInput = (input: string) => {
-    // Remove all non-digit characters
-    const digits = input.replace(/\D/g, "");
-    // Limit to maxLength digits
-    return digits.slice(0, maxLength);
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedPhone = formatPhoneInput(e.target.value);
-    onChange(formattedPhone);
+    // Remove all non-digit characters
+    const digits = e.target.value.replace(/\D/g, "");
+    // Limit to maxLength digits (10)
+    onChange(digits.slice(0, maxLength));
   };
 
   const digitCount = value.replace(/\D/g, "").length;
@@ -28,21 +23,22 @@ export function PhoneInput({
   return (
     <div className="space-y-2">
       <div className="relative">
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">
+          (+234)
+        </div>
         <input
           type="tel"
           value={value}
           onChange={handleChange}
-          className="w-full md:w-64 text-gray-800 text-sm border border-gray-200 rounded-xl pl-4 pr-16 py-3 focus:outline-none focus:ring-2 focus:ring-[#00A082]/20 focus:border-[#00A082]"
-          placeholder="08012345678"
+          className="w-full md:w-64 text-gray-800 text-sm border border-gray-200 rounded-xl pl-16 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00A082]/20 focus:border-[#00A082] transition-all"
+          placeholder="8071920976"
           maxLength={maxLength}
+          inputMode="numeric"
         />
-        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium text-sm">
-          (+234)
-        </div>
       </div>
       <div className="flex justify-between">
-        <p className="text-xs text-gray-500 font-medium">
-          {digitCount}/{maxLength - 1} digits
+        <p className="text-xs text-gray-500">
+          {digitCount}/{maxLength} digits
         </p>
       </div>
     </div>

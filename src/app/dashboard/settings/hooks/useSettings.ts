@@ -7,6 +7,7 @@ import {
 import {
   formatPhoneForDisplay,
   formatPhoneForBackend,
+  formatPhoneForEditing,
 } from "../utils/phoneUtils";
 
 export function useSettings() {
@@ -19,6 +20,7 @@ export function useSettings() {
     name: authUser?.name || "",
     email: authUser?.email || "",
     phoneNumber: authUser?.phoneNumber || "",
+    profileImage: authUser?.profileImage || "",
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -31,31 +33,39 @@ export function useSettings() {
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Initialize form data when authUser changes
+  // In the useEffect initialization:
   useEffect(() => {
     if (authUser) {
       setFormData({
         name: authUser.name || "",
         email: authUser.email || "",
-        phoneNumber: formatPhoneForDisplay(authUser.phoneNumber || ""),
+        // Use formatPhoneForEditing to get just the 10 digits
+        phoneNumber: formatPhoneForEditing(authUser.phoneNumber || ""),
+        profileImage: authUser.profileImage || "",
       });
       setOriginalPhoneNumber(authUser.phoneNumber || "");
+      setImagePreview(authUser.profileImage || null);
     }
   }, [authUser]);
 
+  // In handleToggleEdit:
   const handleToggleEdit = () => {
     setIsEditing(!isEditing);
     if (isEditing) {
-      // Reset form data when canceling
+      // Reset form data when canceling - use formatPhoneForEditing
       setFormData({
         name: authUser?.name || "",
         email: authUser?.email || "",
-        phoneNumber: formatPhoneForDisplay(authUser?.phoneNumber || ""),
+        phoneNumber: formatPhoneForEditing(authUser?.phoneNumber || ""),
+        profileImage: authUser?.profileImage || "",
       });
+      setImagePreview(authUser?.profileImage || null);
+      setSelectedFile(null);
     }
   };
-
   const handleTogglePassword = () => {
     setIsChangingPassword(!isChangingPassword);
     if (isChangingPassword) {
@@ -65,6 +75,70 @@ export function useSettings() {
         confirmPassword: "",
       });
     }
+  };
+
+  const handleImageChange = async (file: File) => {
+    try {
+      const fileSizeMB = file.size / (1024 * 1024);
+      console.log(
+        `Selected file: ${file.name}, Size: ${fileSizeMB.toFixed(2)}MB`,
+      );
+
+      // Simple size validation (optional, backend will also validate)
+      const MAX_SIZE_MB = 10; // Same as backend limit
+      if (fileSizeMB > MAX_SIZE_MB) {
+        setMessage({
+          type: "error",
+          text: `Image size (${fileSizeMB.toFixed(2)}MB) exceeds the ${MAX_SIZE_MB}MB limit.`,
+        });
+        return;
+      }
+
+      // Show immediate preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      setSelectedFile(file);
+      setMessage({
+        type: "success",
+        text: `Image ready to upload (${fileSizeMB.toFixed(2)}MB)`,
+      });
+      setTimeout(() => setMessage(null), 2000);
+    } catch (error) {
+      console.error("Image selection failed:", error);
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "Failed to select image",
+      });
+      setSelectedFile(null);
+      setImagePreview(null);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setSelectedFile(null);
+    setFormData((prev) => ({
+      ...prev,
+      profileImage: "", // Empty string will trigger removal in backend
+    }));
+    setMessage({
+      type: "success",
+      text: "Profile image will be removed on save",
+    });
+    setTimeout(() => setMessage(null), 2000);
+  };
+
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   const handleUpdateProfile = async () => {
@@ -78,18 +152,45 @@ export function useSettings() {
     }
 
     setIsLoading(true);
+    setMessage({ type: "success", text: "Uploading profile..." });
+
     try {
       // Format phone number for backend
       const formattedPhoneNumber = formatPhoneForBackend(formData.phoneNumber);
 
-      await updateProfile({
+      // Create update object
+      const updateData: any = {
         name: formData.name,
         email: formData.email,
         phoneNumber: formattedPhoneNumber || undefined,
-      });
+      };
+
+      // Handle profile image
+      if (selectedFile) {
+        // Convert directly to base64 without compression
+        const base64Image = await convertFileToBase64(selectedFile);
+        const base64SizeMB = (base64Image.length * 3) / (4 * 1024 * 1024); // Approximate size
+
+        console.log(`Uploading image as base64: ${base64SizeMB.toFixed(2)}MB`);
+
+        // Optional: Show warning for large files (but still upload)
+        if (base64SizeMB > 5) {
+          console.warn(
+            `Large image: ${base64SizeMB.toFixed(2)}MB - proceeding anyway`,
+          );
+        }
+
+        updateData.profileImage = base64Image;
+      } else if (formData.profileImage === "") {
+        // If profileImage is empty string, send null to remove
+        updateData.profileImage = null;
+      }
+
+      await updateProfile(updateData);
 
       setMessage({ type: "success", text: "Profile updated successfully!" });
       setIsEditing(false);
+      setSelectedFile(null);
 
       // Update original phone number
       if (authUser) {
@@ -160,8 +261,12 @@ export function useSettings() {
     message,
     isLoading,
     isLoggingOut,
+    imagePreview,
+    selectedFile,
     handleToggleEdit,
     handleTogglePassword,
+    handleImageChange,
+    handleRemoveImage,
     handleUpdateProfile,
     handleChangePassword,
     handleLogout,

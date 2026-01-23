@@ -1,22 +1,33 @@
-// Format phone number for display - remove +234 prefix if present
+// Format phone number for display with parentheses and spaces
 export function formatPhoneForDisplay(phone: string): string {
-  if (!phone) return "";
+  if (!phone) return "Not provided";
 
   // Remove +234 prefix
-  if (phone.startsWith("+234")) {
-    return "0" + phone.substring(4);
+  const cleaned = phone.replace(/^\+234/, "").replace(/^234/, "");
+
+  // If empty, return Not provided
+  if (!cleaned) return "Not provided";
+
+  // Add leading 0 if not present
+  const withZero = cleaned.startsWith("0") ? cleaned : `0${cleaned}`;
+
+  // Format as (+234) XXX XXX XXXX
+  if (withZero.length === 11) {
+    return `(+234) ${withZero.substring(1, 4)} ${withZero.substring(4, 7)} ${withZero.substring(7)}`;
   }
 
-  // Remove any non-digit characters
-  const digits = phone.replace(/\D/g, "");
+  return withZero;
+}
 
-  // If it's 13 digits and starts with 234, convert to 0 format
-  if (digits.length === 13 && digits.startsWith("234")) {
-    return "0" + digits.substring(3);
-  }
+// Format phone number for editing - just the 10 digits (no leading 0)
+export function formatPhoneForEditing(phone: string): string {
+  if (!phone) return "";
 
-  // Otherwise return digits (max 10)
-  return digits.slice(0, 10);
+  // Remove +234 prefix if present
+  const cleaned = phone.replace(/^\+234/, "").replace(/^234/, "");
+
+  // Remove leading 0 if present
+  return cleaned.startsWith("0") ? cleaned.substring(1) : cleaned;
 }
 
 // Format phone number for backend - add +234 prefix
@@ -29,29 +40,21 @@ export function formatPhoneForBackend(phone: string): string {
   // If empty after cleaning, return empty
   if (digits.length === 0) return "";
 
-  // If it starts with 0, convert to +234
-  if (digits.startsWith("0") && digits.length >= 10) {
-    return `+234${digits.substring(1, 11)}`;
-  }
-
-  // If it's already in +234 format or 234 format, ensure proper format
-  if (digits.startsWith("234") && digits.length >= 13) {
-    return `+${digits.substring(0, 13)}`;
-  }
-
-  // Otherwise, assume it's a 10-digit number and add +234
+  // If it's 10 digits (without leading 0), add +234
   if (digits.length === 10) {
     return `+234${digits}`;
   }
 
-  // Return as is (backend should handle validation)
-  return phone;
+  // If it starts with 0 and is 11 digits, convert to +234
+  if (digits.startsWith("0") && digits.length === 11) {
+    return `+234${digits.substring(1)}`;
+  }
+
+  // Return as is
+  return digits;
 }
 
-// Format phone number as user types - only allow 10 digits
-export function formatPhoneInput(value: string): string {
-  // Remove all non-digit characters
-  const digits = value.replace(/\D/g, "");
-  // Limit to 10 digits
-  return digits.slice(0, 10);
+// Clean phone input - remove all non-digits
+export function cleanPhoneInput(value: string): string {
+  return value.replace(/\D/g, "");
 }

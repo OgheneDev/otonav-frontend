@@ -25,8 +25,12 @@ export default function SettingsPage() {
     message,
     isLoading,
     isLoggingOut,
+    imagePreview,
+    selectedFile,
     handleToggleEdit,
     handleTogglePassword,
+    handleImageChange,
+    handleRemoveImage,
     handleUpdateProfile,
     handleChangePassword,
     handleLogout,
@@ -79,11 +83,17 @@ export default function SettingsPage() {
         hasChanges={
           formData.name !== authUser?.name ||
           formData.email !== authUser?.email ||
-          formData.phoneNumber !== authUser?.phoneNumber
+          formData.phoneNumber !== authUser?.phoneNumber ||
+          selectedFile !== null ||
+          formData.profileImage === ""
         }
         onToggleEdit={handleToggleEdit}
         onUpdateProfile={handleUpdateProfile}
         onFormDataChange={setFormData}
+        onImageChange={handleImageChange}
+        onRemoveImage={handleRemoveImage}
+        imagePreview={imagePreview}
+        selectedFile={selectedFile}
       />
 
       {/* Security Card */}

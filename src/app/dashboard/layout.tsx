@@ -218,7 +218,7 @@ export default function DashboardLayout({
                 </p>
                 <p className="text-sm text-gray-800">{authUser?.name}</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-linear-to-br from-gray-200 to-gray-300 border-2 border-white shadow-md overflow-hidden ring-2 ring-gray-100 group-hover:ring-[#00A082] transition-all">
+              <div className="w-14 h-14 rounded-full bg-linear-to-br from-gray-200 to-gray-300 border-2 border-white shadow-md overflow-hidden ring-2 ring-gray-100 group-hover:ring-[#00A082] transition-all">
                 {getProfileImage()}
               </div>
             </div>
