@@ -1,10 +1,12 @@
 import { Package } from "lucide-react";
+import { useAuthStore } from "@/stores";
 
 interface OrderHeaderProps {
   totalOrders: number;
 }
 
 export function OrderHeader({ totalOrders }: OrderHeaderProps) {
+  const { authUser } = useAuthStore();
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
       <div>
@@ -13,7 +15,11 @@ export function OrderHeader({ totalOrders }: OrderHeaderProps) {
         </h1>
         <div className="h-1 w-12 hidden md:block bg-[#00A082] rounded-full mt-2 mb-3" />
         <p className="text-gray-500 text-center text-sm md:text-start mt-2">
-          Manage and track all logistics operations in real-time.
+          Manage and track all logistics operations for{" "}
+          <span className="text-[#FF7B7B] font-semibold">
+            {authUser?.organizations?.[0]?.name}
+          </span>{" "}
+          in real-time.
         </p>
       </div>
       <div className="flex items-center gap-3">

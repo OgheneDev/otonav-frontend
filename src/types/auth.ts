@@ -1,3 +1,17 @@
+export interface OrganizationDetail {
+  id: string;
+  name: string;
+  slug?: string | null;
+  address: string;
+  createdAt?: string | Date | null;
+  updatedAt?: string | Date | null;
+  role: string;
+  isActive: boolean;
+  isSuspended: boolean;
+  joinedAt?: string | Date | null;
+  invitationStatus?: "pending" | "completed" | "cancelled" | "expired";
+}
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -10,11 +24,17 @@ export interface AuthUser {
   defaultOrgRole?: string;
   createdAt?: string;
   lastLoginAt?: string;
+
+  // Organization details for owners/riders
+  organizations?: OrganizationDetail[];
+  // For backward compatibility - keep these as aliases to the first org
+  orgId?: string;
+  orgRole?: string;
 }
 
 export interface OrganizationMembership {
   orgId: string;
-  role: "owner" | "rider";
+  role: "owner" | "rider" | "customer";
   isActive: boolean;
   joinedAt: string;
 }

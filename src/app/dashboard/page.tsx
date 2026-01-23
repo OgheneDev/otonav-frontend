@@ -43,15 +43,15 @@ export default function DashboardPage() {
   // Calculate stats
   const totalOrders = orders.length;
   const deliveredOrders = orders.filter(
-    (order) => order.status === "delivered"
+    (order) => order.status === "delivered",
   ).length;
   const confirmedOrders = orders.filter(
-    (order) => order.status === "confirmed"
+    (order) => order.status === "confirmed",
   );
   const totalRiders = riders.filter(
     (rider) =>
       !rider.orgMembership?.isSuspended &&
-      rider.orgMembership?.isActive !== false
+      rider.orgMembership?.isActive !== false,
   ).length;
 
   return (
@@ -63,7 +63,11 @@ export default function DashboardPage() {
         </h2>
         <div className="h-1 w-12 hidden md:block bg-[#00A082] rounded-full mt-2 mb-3" />
         <p className="text-gray-500 text-sm text-center md:text-start mt-1">
-          Hi, {authUser?.name}. Welcome back to OtoNav Vendor Dashboard!
+          Hi, {authUser?.name}. Welcome back to{" "}
+          <span className="text-[#FF7B7B] font-semibold">
+            {authUser?.organizations?.[0]?.name}
+          </span>{" "}
+          Vendor Dashboard!
         </p>
       </section>
 

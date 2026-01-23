@@ -1,10 +1,12 @@
 import { UserPlus } from "lucide-react";
+import { useAuthStore } from "@/stores";
 
 interface CustomersHeaderProps {
   onCreateCustomer: () => void;
 }
 
 export function CustomersHeader({ onCreateCustomer }: CustomersHeaderProps) {
+  const { authUser } = useAuthStore();
   return (
     <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
       <section className="text-center md:text-left">
@@ -13,7 +15,10 @@ export function CustomersHeader({ onCreateCustomer }: CustomersHeaderProps) {
         </h2>
         <div className="h-1 w-12 hidden md:block bg-[#00A082] rounded-full mt-2 mb-3" />
         <p className="text-gray-500 text-sm mt-1">
-          View all customers in your organization.
+          View all customers in{" "}
+          <span className="text-[#FF7B7B] font-semibold">
+            {authUser?.organizations?.[0]?.name}
+          </span>
         </p>
       </section>
 
